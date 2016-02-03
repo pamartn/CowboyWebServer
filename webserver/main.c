@@ -5,10 +5,17 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <strings.h>
+#include <signal.h>
 
 #define BUF_SIZE 1024
 
+void initialiser_signaux(void) {
+	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR){	
+		perror("signal");
+	}
+}
 int main(void){
+	initialiser_signaux();
 	int socket_serveur = creer_serveur(8080);
 	if(socket_serveur == -1)
 		return 1;
@@ -43,3 +50,6 @@ int main(void){
 	close(socket_serveur);
 	return 0;
 }
+
+
+
