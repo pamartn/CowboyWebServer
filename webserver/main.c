@@ -33,7 +33,7 @@ void initialiser_signaux(void){
 }
 
 int main(void){
-	const char *message_bienvenue = "Bonjour, bienvenue sur le serveur Cowboy. Ce serveur est créé pour remplacer Apache.\nLes cowboys ont tués les Indiens d'Amérique et se sont appropriés leurs terres.\n Le cow-boy ou cowboy, de l'anglais cow, « vache » et boy, « garçon »), qui signifie vacher ou bouvier en français, est un garçon de ferme s'occupant du bétail bovin dans les pays anglo-saxons de grands espaces comme le Far West américain et l'Outback australien.\n";
+//	const char *message_bienvenue = "Bonjour, bienvenue sur le serveur Cowboy. Ce serveur est créé pour remplacer Apache.\nLes cowboys ont tués les Indiens d'Amérique et se sont appropriés leurs terres.\n Le cow-boy ou cowboy, de l'anglais cow, « vache » et boy, « garçon »), qui signifie vacher ou bouvier en français, est un garçon de ferme s'occupant du bétail bovin dans les pays anglo-saxons de grands espaces comme le Far West américain et l'Outback australien.\n";
 	
 	initialiser_signaux();
 	int socket_serveur = creer_serveur(8080);
@@ -49,21 +49,21 @@ int main(void){
 		}
 		if(fork() == 0){
 			/* On peut maintenant dialoguer avec le client */
-			int testErrorWrite = write(socket_client, message_bienvenue, strlen(message_bienvenue));
+			FILE *f = fdopen(socket_client, "w+");	
+			/*int testErrorWrite = write(socket_client, message_bienvenue, strlen(message_bienvenue));
 			if (testErrorWrite == -1) {
 				perror("error write :");
 				exit(1);
-			}
+			}*/
 			char buf[BUF_SIZE];
-			int n;
 			bzero(buf, BUF_SIZE);
-			while((n = read(socket_client, buf, BUF_SIZE-1)) > 0){
-				buf[BUF_SIZE-1] = '\0';
+			while(fgets(buf, BUF_SIZE-1, f) != NULL){
 				printf("%s", buf);
-				if(write(socket_client, buf, n) <= 0)
+				if(fprintf(f, "<Cowboy> %s", buf) < 0)
 					break;
 				bzero(buf, BUF_SIZE);
 			}
+			fclose(f);
 			close(socket_client);
 			exit(1);
 		} else {
