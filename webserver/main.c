@@ -11,7 +11,7 @@
 int main(void){
 	int socket_serveur = creer_serveur(8080);
 	if(socket_serveur == -1)
-		return -1;
+		return 1;
 	int socket_client;
 	socket_client = accept(socket_serveur, NULL, NULL);
 	if (socket_client == -1){
@@ -20,8 +20,9 @@ int main(void){
 	}
 	/* On peut maintenant dialoguer avec le client */
 	const char *message_bienvenue = "Bonjour, bienvenue sur le serveur Cowboy. Ce serveur est créé pour remplacer Apache.\nLes cowboys ont tués les Indiens d'Amérique et se sont appropriés leurs terres.\n Le cow-boy ou cowboy, de l'anglais cow, « vache » et boy, « garçon »), qui signifie vacher ou bouvier en français, est un garçon de ferme s'occupant du bétail bovin dans les pays anglo-saxons de grands espaces comme le Far West américain et l'Outback australien.\n";
-	write(socket_client, message_bienvenue, strlen(message_bienvenue));
 	
+	write(socket_client, message_bienvenue, strlen(message_bienvenue));
+	sleep(1);	
 	char buf[BUF_SIZE];
 	while(1){
 		bzero(buf, BUF_SIZE);
