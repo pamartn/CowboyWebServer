@@ -2,35 +2,12 @@
 #include <string.h>
 #include "socket.h"
 #include <sys/types.h>
-#include <sys/wait.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <strings.h>
-#include <signal.h>
 #include <stdlib.h>
-
+#include "signals.h"
 #define BUF_SIZE 1024
-
-void traitement_signal(){
-	int status;
-	int pid;
-	while ((pid = waitpid(-1,&status,WNOHANG)) > 0) {
-		printf ("Processus numéro %d a retourné %d\n ", pid, status);
-	}
-}
-
-void initialiser_signaux(void){
-	struct sigaction sa;
-	sa.sa_handler = traitement_signal;
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = SA_RESTART;
-	if (sigaction(SIGCHLD, &sa, NULL) == -1){
-		perror ("sigaction(SIGCHLD)");
-	}
-	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR){	
-		perror("signal");
-	}
-}
 
 int main(void){
 //	const char *message_bienvenue = "Bonjour, bienvenue sur le serveur Cowboy. Ce serveur est créé pour remplacer Apache.\nLes cowboys ont tués les Indiens d'Amérique et se sont appropriés leurs terres.\n Le cow-boy ou cowboy, de l'anglais cow, « vache » et boy, « garçon »), qui signifie vacher ou bouvier en français, est un garçon de ferme s'occupant du bétail bovin dans les pays anglo-saxons de grands espaces comme le Far West américain et l'Outback australien.\n";
