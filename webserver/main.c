@@ -50,17 +50,10 @@ int main(void){
 		if(fork() == 0){
 			/* On peut maintenant dialoguer avec le client */
 			FILE *f = fdopen(socket_client, "w+");	
-			/*int testErrorWrite = write(socket_client, message_bienvenue, strlen(message_bienvenue));
-			if (testErrorWrite == -1) {
-				perror("error write :");
-				exit(1);
-			}*/
 			char buf[BUF_SIZE];
 			bzero(buf, BUF_SIZE);
 			while(fgets(buf, BUF_SIZE-1, f) != NULL){
 				printf("%s", buf);
-				if(fprintf(f, "<Cowboy> %s", buf) < 0)
-					break;
 				bzero(buf, BUF_SIZE);
 			}
 			fclose(f);

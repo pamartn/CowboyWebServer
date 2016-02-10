@@ -2,3 +2,17 @@
 2 - Cela ferme le serveur sans rien afficher : le serveur plante (code de retour > 0) On veut écrire mais nc a fermé la socket : une SIG_PIPE ? :)
 3 - Erreur : "Trying ::1... telnet: Unable to connect to remote host: Connection refused" Normal on listen sur du IPv4 pas du IPv6
 4 - le client lancé en 2eme plante : normal on ne gère qu'une socket (on a fait qu'un seul accept) il faudrait faire un fork pour traiter le client après le accept
+
+Chapitre 5 :
+
+Message envoyé par le client web (curl) :
+
+GET / HTTP/1.1
+User-Agent: curl/7.38.0
+Host: 127.0.0.1:8080
+Accept: */*
+
+GET : method
+/ : ressource
+HTTP/1.1 : protocol version
+
