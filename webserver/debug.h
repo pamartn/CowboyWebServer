@@ -2,6 +2,11 @@
 # define __DEBUG_H__
 
 
+/*
+	Debug header to define debug macro.
+	Found on http://stackoverflow.com/questions/1941307/c-debug-print-macros
+*/
+
 //#define DEBUG
 
 #ifdef DEBUG
