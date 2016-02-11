@@ -5,7 +5,7 @@ void traitement_signal(){
 	int status;
 	int pid;
 	while ((pid = waitpid(-1,&status,WNOHANG)) > 0) {
-		printf ("Processus numéro %d a retourné %d\n ", pid, status);
+		DEBUG_PRINT("Processus numéro %d a retourné %d\n ", pid, status);
 	}
 }
 

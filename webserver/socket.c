@@ -1,9 +1,6 @@
 // Autor : Etienne (Nicolas)
-#include <sys/types.h>          /* See NOTES */
-#include <sys/socket.h>
 #include "socket.h"
-#include <stdio.h>
-#include <arpa/inet.h>
+
 
 int creer_serveur(int port){
 	int socket_serveur ;
