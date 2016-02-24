@@ -1,67 +1,53 @@
 #include "client.h"
 
-/* 
-	Vérifie la première ligne du header http
-	Retourne 0 si echec, 1 si réussi
-*/
-int verifier_ligne(char *ligne, char *url){
-	int mots = 0;
-	char *token;
-	token = strtok(ligne, " ");
-
-	while(token != NULL){
-		//On va maintenant analyser les mots
-		if(mots == 0 && !strcmp(token, "GET") == 0)
-			return 0;
-		if(mots == 1 && strlen(token) <= URL_SIZE)
-			strcpy(url, token);
-		if(mots == 2 && !(strncmp(token, "HTTP/1.0", 8) == 0 || strncmp(token, "HTTP/1.1", 8) == 0))
-			return 0;
-		// On récupère le prochain mot
-		token = strtok(NULL, " ");
-		mots++;
-	}
-	return mots == 3;
+void send_status(FILE * client, int code, const char *reason_phrase){
+	char res[strlen(reason_phrase)+ 20];
+	sprintf(res, "HTTP/1.1 %d %s\r\n", code, reason_phrase);
+	fprintf(client, res);
 }
 
-void creer_reponse(char *res, char *url, int valid){
-	int content_length;		
-	char *msg;
-	if(valid && strcmp(url,"/") == 0){
-		msg = "<html><head><meta charset=\"UTF-8\"></head><h1>It works!</h1>Bonjour, bienvenue sur le serveur Cowboy. Ce serveur est créé pour remplacer Apache.\nLes cowboys ont tués les Indiens d'Amérique et se sont appropriés leurs terres.\n Le cow-boy ou cowboy, de l'anglais cow, « vache » et boy, « garçon »), qui signifie vacher ou bouvier en français, est un garçon de ferme s'occupant du bétail bovin dans les pays anglo-saxons de grands espaces comme le Far West américain et l'Outback australien.</html>";
-		content_length = strlen(msg);
-		sprintf(res, "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-length: %d\r\nContent-Type: text/html\r\n\r\n%s", content_length, msg);	
-	} else if(valid) {
-		msg = "404 Not found : ";
-		char *msg2 = " was not found on this server :(";
-		content_length = strlen(msg)+strlen(url)+strlen(msg2);
-		sprintf(res, "HTTP/1.1 404 Not Found\r\nConnection: close\r\nContent-length: %d\r\n\r\n%s%s%s", content_length, msg, url, msg2);
-	} else {
-		msg = "400 Bad request";
-		content_length = strlen(msg);
-		sprintf(res, "HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-length: %d\r\n\r\n%s", content_length, msg);
-	}
+void send_response(FILE *client, int code, const char *reason_phrase, const char *message_body){
+	char res[256+strlen(message_body)];
+	sprintf(res, "Connection: close\r\nContent-length: %zu\r\n\r\n%s", strlen(message_body), message_body);
+	send_status(client, code, reason_phrase);
+	fprintf(client, res);
 }
 
+char *fgets_or_exit(char *buffer, int size, FILE *stream){
+	if(fgets(buffer, size, stream) == NULL)
+		exit(1);
+	return buffer;
+}
+
+
+void skip_headers(FILE * client){
+	char line[BUF_SIZE];
+	
+	while(fgets_or_exit(line, BUF_SIZE, client) != NULL && strcmp(line, "\n") != 0 && strcmp(line, "\r\n") != 0);
+}
 
 void dialoguer(int socket_client){
 	/* On peut maintenant dialoguer avec le client */
-	FILE *f = fdopen(socket_client, "w+");	
-	char buf[BUF_SIZE];
+	char *motd = "<html><head><meta charset=\"UTF-8\"></head><h1>It works!</h1>Bonjour, bienvenue sur le serveur Cowboy. Ce serveur est créé pour remplacer Apache.\nLes cowboys ont tués les Indiens d'Amérique et se sont appropriés leurs terres.\n Le cow-boy ou cowboy, de l'anglais cow, « vache » et boy, « garçon »), qui signifie vacher ou bouvier en français, est un garçon de ferme s'occupant du bétail bovin dans les pays anglo-saxons de grands espaces comme le Far West américain et l'Outback australien.</html>";
 
-	char res[2048];
-	char url[URL_SIZE];
-	if(fgets(buf, BUF_SIZE, f) != NULL){
-		DEBUG_PRINT("%s\n", buf);
-		if(verifier_ligne(buf, url))
-			creer_reponse(res, url, 1);
-		else
-			creer_reponse(res, url, 0);
-		while(strcmp(buf, "\n") != 0 && strcmp(buf, "\r\n") != 0)
-			fgets(buf, BUF_SIZE, f); 
+	FILE *client = fdopen(socket_client, "w+");	
+	
+	char first_line[BUF_SIZE];
+	fgets_or_exit(first_line, BUF_SIZE, client);
+	DEBUG_PRINT("%s", first_line);
+	skip_headers(client);
+	
+	http_request request;
+	int bad_request = !parse_http_request(first_line, &request);
+	
+	if(bad_request)
+		send_response(client, 400, "Bad Request", "Bad request");
+	else if (request.method == HTTP_UNSUPPORTED)
+		send_response(client, 405, "Method Not Allowed", "Method Not Allowed");
+	else if (strcmp(request.url , "/") == 0)
+		send_response(client, 200, "OK", motd);
+	else
+		send_response(client, 404, "Not Found", "Not Found");
 
-		DEBUG_PRINT("response :\n%s\n", res);
-		fprintf(f, res);		
-	}
-	fclose(f);
+	fclose(client);	
 }
