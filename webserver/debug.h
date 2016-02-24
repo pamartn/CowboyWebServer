@@ -7,7 +7,7 @@
 	Found on http://stackoverflow.com/questions/1941307/c-debug-print-macros
 */
 
-//#define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
 #define DEBUG_PRINT(fmt, args...)    fprintf(stderr, fmt, ## args)
