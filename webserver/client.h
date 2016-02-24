@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include "debug.h"
 #include "request.h"
-
+#include "file.h"
 
 #define BUF_SIZE 1024
 

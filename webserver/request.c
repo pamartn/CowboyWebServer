@@ -22,7 +22,7 @@ int parse_http_request(const char *request_line, http_request *request) {
 			request->method = HTTP_GET;
 		}
 		if(mots == 1 && strlen(token) <= URL_SIZE){
-			strncpy(request->url, token, URL_SIZE);
+			strcpy(request->url, token);
 		}
 		if(mots == 2){
 			if(strncmp(token, "HTTP/1.0", 8) == 0){
