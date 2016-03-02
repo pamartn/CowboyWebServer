@@ -1,10 +1,5 @@
 #include "file.h" 
 
-char *rewrite_url(char *url){
-	char *cutpoint = strchr(url, '?');
-	cutpoint[0] = '\0';
-	return cutpoint;
-}
 
 int check_and_open(const char *url, const char *document_root){
 	char path[strlen(document_root)+strlen(url)+1];

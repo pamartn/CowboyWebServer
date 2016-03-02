@@ -8,7 +8,6 @@
 #include <string.h>
 #include <stdio.h>
 
-char *rewrite_url(char *url);
 
 int check_and_open(const char *url, const char *document_root);
 

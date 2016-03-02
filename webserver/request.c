@@ -1,5 +1,21 @@
 #include "request.h"
 
+char *rewrite_url(char *url){
+	if(strcmp(url, "/") == 0)
+		return "/index.html";
+	printf("url : %s\n", url);
+	char *cutpoint = strchr(url, '?');
+	if(cutpoint == NULL)
+		return url;
+	url[(cutpoint - url)] = '\0';
+	return url;
+}
+
+int verify_url(char *url){
+	return strstr(url, "..") == NULL;
+}
+
+
 /* 
 	Vérifie la première ligne du header http
 	Retourne 0 si echec, 1 si réussi
@@ -22,7 +38,9 @@ int parse_http_request(const char *request_line, http_request *request) {
 			request->method = HTTP_GET;
 		}
 		if(mots == 1 && strlen(token) <= URL_SIZE){
-			strcpy(request->url, token);
+			request->url = strdup(token);
+			request->url = rewrite_url(request->url);
+			DEBUG_PRINT("URL REWRITED : %s\n", request->url);
 		}
 		if(mots == 2){
 			if(strncmp(token, "HTTP/1.0", 8) == 0){

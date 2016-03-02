@@ -1,16 +1,12 @@
 #include "client.h"
 
 void send_status(FILE * client, int code, const char *reason_phrase){
-	char res[strlen(reason_phrase)+ 20];
-	sprintf(res, "HTTP/1.1 %d %s\r\n", code, reason_phrase);
-	fprintf(client, res);
+	fprintf(client, "HTTP/1.1 %d %s\r\n", code, reason_phrase);
 }
 
 void send_response(FILE *client, int code, const char *reason_phrase, char *message_body){
-	char res[256+strlen(message_body)];
-	sprintf(res, "Connection: close\r\nContent-length: %zu\r\n\r\n%s", strlen(message_body), message_body);
 	send_status(client, code, reason_phrase);
-	fprintf(client, res);
+	fprintf(client, "Connection: close\r\nContent-length: %zu\r\n\r\n%s", strlen(message_body), message_body);
 }
 
 char *fgets_or_exit(char *buffer, int size, FILE *stream){
@@ -22,7 +18,6 @@ char *fgets_or_exit(char *buffer, int size, FILE *stream){
 
 void skip_headers(FILE * client){
 	char line[BUF_SIZE];
-	
 	while(fgets_or_exit(line, BUF_SIZE, client) != NULL && strcmp(line, "\n") != 0 && strcmp(line, "\r\n") != 0);
 }
 
@@ -58,16 +53,15 @@ void dialoguer(int socket_client){
 		send_response(client, 400, "Bad Request", "Bad request");
 	else if (request.method == HTTP_UNSUPPORTED)
 		send_response(client, 405, "Method Not Allowed", "Method Not Allowed");
+	else if (!verify_url(request.url))
+		send_response(client, 403, "Forbidden", "Forbidden");
 	else {
-		int fd = check_and_open(request.url, "public");
+		int fd = check_and_open(request.url, BASE_DIR);
 		if(fd < 0)
 			send_response(client, 404, "Not Found", "Not Found");
 		else {
-			char res[1024];
-			sprintf(res, "Connection: close\r\nContent-type: %s\r\nContent-length: %d\r\n\r\n", get_content_type(request.url), get_file_size(fd));
-			printf("%s\n", res);
 			send_status(client, 200, "OK");
-			fprintf(client, res);
+			fprintf(client, "Connection: close\r\nContent-type: %s\r\nContent-length: %d\r\n\r\n", get_content_type(request.url), get_file_size(fd));
 			fflush(client);
 			copy(fd, socket_client);			
 		}

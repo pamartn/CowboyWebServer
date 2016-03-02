@@ -1,28 +1,25 @@
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include "signals.h"
-#include "client.h"
-#include "socket.h"
-#include "debug.h"
-
-#define SERVER_PORT 8080
+#include "main.h"
 
 char *BASE_DIR;
 
-int main(int argc, char **argv){
-	BASE_DIR = malloc(1024*sizeof(char));
-	if(argc >= 2){
-		struct stat sb;
-		stat(argv[1], &sb);
-		if(S_ISDIR(sb.st_mode)) {
-			BASE_DIR = argv[1];
-		} else {
-			printf("Directory %s does not exists !\n", argv[1]);
-			return 1;
-		}
+
+int set_base_dir(char *dirname){
+	struct stat sb;
+	stat(dirname, &sb);
+	if(S_ISDIR(sb.st_mode)) {
+		BASE_DIR = dirname;
+	} else {
+		printf("Directory %s does not exists !\n", dirname);
+		return 0;
 	}
+	return 1;
+}
+
+int main(int argc, char **argv){
+	BASE_DIR = "public";
+	if(argc >= 2 && !set_base_dir(argv[1]))
+		return 1;
+	printf("Server basedir : %s\n", BASE_DIR);	
 
 	DEBUG_PRINT("Debugging enabled\n");
 	initialiser_signaux();

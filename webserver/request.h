@@ -23,6 +23,10 @@ typedef struct
 	char * url;
 } http_request;
 
+char *rewrite_url(char *url);
+
+int verify_url(char *url);
+
 int parse_http_request(const char *request_line, http_request *request);
 
 #endif
