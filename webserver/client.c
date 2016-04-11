@@ -51,6 +51,10 @@ void dialoguer(int socket_client){
 	FILE *client = fdopen(socket_client, "w+");	
 	
 	web_stats *stats = get_stats();
+	if(sem_wait(&stats->sem) == -1){
+		perror("sem_wait");
+		exit(1);
+	}
 	stats->served_connections++;
 
 	char first_line[BUF_SIZE];
@@ -91,4 +95,9 @@ void dialoguer(int socket_client){
 	}
 	fclose(client);
 	close(socket_client);
+	if(sem_post(&stats->sem) == -1){
+		perror("sem_post");
+		exit(1);
+	}
+
 }

@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <strings.h>
 #include <stdlib.h>
+#include <semaphore.h>
 #include "debug.h"
 #include "request.h"
 #include "file.h"

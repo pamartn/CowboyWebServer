@@ -2,8 +2,8 @@
 # ainsi que les paramètres de compilation
 CC=gcc
 LD=gcc
-CFLAGS=-Wall -W -Werror
-LDFLAGS=
+CFLAGS=-Wall -W -Werror -pthread
+LDFLAGS=-pthread
 # Le nom de l’exécutable à fabriquer
 EXE=cowboy
 # Les variables HEADERS, CFILES et OBJS vont contenir respectivement
