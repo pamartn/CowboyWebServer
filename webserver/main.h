@@ -10,6 +10,7 @@
 #include "client.h"
 #include "socket.h"
 #include "debug.h"
+#include "stats.h"
 
 #define SERVER_PORT 8080
 

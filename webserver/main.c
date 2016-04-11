@@ -22,6 +22,7 @@ int main(int argc, char **argv){
 	printf("Server basedir : %s\n", BASE_DIR);	
 
 	DEBUG_PRINT("Debugging enabled\n");
+	init_stats();
 	initialiser_signaux();
 	int socket_serveur = creer_serveur(SERVER_PORT);
 	if(socket_serveur == -1)

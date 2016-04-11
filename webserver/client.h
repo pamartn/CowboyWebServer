@@ -11,6 +11,7 @@
 #include "request.h"
 #include "file.h"
 #include "main.h"
+#include "stats.h"
 
 #define BUF_SIZE 1024
 
