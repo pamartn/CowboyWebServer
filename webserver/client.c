@@ -51,11 +51,11 @@ void dialoguer(int socket_client){
 	FILE *client = fdopen(socket_client, "w+");	
 	
 	web_stats *stats = get_stats();
-	if(sem_wait(&stats->sem) == -1){
-		perror("sem_wait");
-		exit(1);
-	}
+	
+	stats_wait(&stats->sem);
 	stats->served_connections++;
+	stats_post(&stats->sem);
+
 
 	char first_line[BUF_SIZE];
 	fgets_or_exit(first_line, BUF_SIZE, client);
@@ -66,27 +66,43 @@ void dialoguer(int socket_client){
 	int bad_request = !parse_http_request(first_line, &request);
 	stats->served_requests++;	
 	if(bad_request) {
+		
+		stats_wait(&stats->sem);
 		stats->ko_400++;
+		stats_post(&stats->sem);
+
 		send_response(client, 400, "Bad Request", "Bad request");
 	}
 	else if (request.method == HTTP_UNSUPPORTED) {
 		send_response(client, 405, "Method Not Allowed", "Method Not Allowed");
 	}
 	else if (!verify_url(request.url)) {
+		stats_wait(&stats->sem);
 		stats->ko_403++;
+		stats_post(&stats->sem);
+		
 		send_response(client, 403, "Forbidden", "Forbidden");
 	}
 	else if(strcmp(request.url, "/stats") == 0) {
-			stats->ok_200++;
-			send_stats(client);
+		stats_wait(&stats->sem);
+		stats->ok_200++;
+		stats_post(&stats->sem);
+		
+		send_stats(client);
 	} else {
 		int fd = check_and_open(request.url, BASE_DIR);
 		if(fd < 0) {
+			stats_wait(&stats->sem);
 			stats->ko_404++;
+			stats_post(&stats->sem);
+		
 			send_response(client, 404, "Not Found", "Not Found");
 		}
 		else {
+			stats_wait(&stats->sem);
 			stats->ok_200++;
+			stats_post(&stats->sem);
+			
 			send_status(client, 200, "OK");
 			fprintf(client, "Connection: close\r\nContent-type: %s\r\nContent-length: %d\r\n\r\n", get_content_type(request.url), get_file_size(fd));
 			fflush(client);
@@ -95,9 +111,5 @@ void dialoguer(int socket_client){
 	}
 	fclose(client);
 	close(socket_client);
-	if(sem_post(&stats->sem) == -1){
-		perror("sem_post");
-		exit(1);
-	}
-
+	
 }

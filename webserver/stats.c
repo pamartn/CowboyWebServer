@@ -20,6 +20,23 @@ int init_stats(void){
 	return 1;
 }
 
+void stats_post(sem_t *sem){
+	if(sem_post(sem) == -1){
+		perror("sem_post");
+		exit(1);
+	}
+
+}
+
+
+void stats_wait(sem_t *sem){
+	if(sem_wait(sem) == -1){
+		perror("sem_wait");
+		exit(1);
+	}
+
+}
+
 web_stats *get_stats(void){
 	return stats;
 }

@@ -18,6 +18,12 @@ typedef struct {
 
 
 int init_stats(void);
+
+void stats_wait(sem_t *sem);
+
+
+void stats_post(sem_t *sem);
+
 web_stats *get_stats(void);
 
 #endif
